@@ -4,22 +4,22 @@ grafo.py
 Matemática Discreta - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Grupo: GP2B
-Integrantes:
+Group: GP2B
+Members:
     - Jorge Ibinarriaga
     - Miguel Angel Huamani
 
-Descripción:
-Librería para la creación y análisis de grafos dirigidos y no dirigidos.
+Description:
+Library for creating and analyzing directed and undirected graphs.
 """
 
 from typing import List,Tuple,Dict
 import networkx as nx
 import sys
 
-import heapq #Librería para la creación de colas de prioridad
+import heapq #Library for creating priority queues
 
-INFTY = sys.float_info.max #Distincia "infinita" entre nodos de un grafo
+INFTY = sys.float_info.max # "Infinite" distance between nodes of a graph
 
 
 def es_hasheable(v):
@@ -31,38 +31,38 @@ def es_hasheable(v):
 
 class Grafo():
     """
-    Clase que almacena un grafo dirigido o no dirigido y proporciona herramientas
-    para su análisis.<
+    Class that stores a directed or undirected graph and provides tools
+    for its analysis.
     """
 
     def __init__(self,dirigido:bool=False):
-        """ Crea un grafo dirigido o no dirigido.
+        """ Creates a directed or undirected graph.
         
         Args:
-            dirigido (bool): Flag que indica si el grafo es dirigido (verdadero) o no (falso).
+            dirigido (bool): Flag indicating whether the graph is directed (true) or not (false).
 
         Returns:
-            Grafo o grafo dirigido (según lo indicado por el flag)
-            inicializado sin vértices ni aristas.
+            Graph or directed graph (as indicated by the flag)
+            initialized without vertices or edges.
         """
 
-        # Flag que indica si el grafo es dirigido o no.
+        # Flag indicating whether the graph is directed or not.
         self.dirigido=dirigido
 
         """
-        Diccionario que almacena la lista de adyacencia del grafo.
-        adyacencia[u]:  diccionario cuyas claves son la adyacencia de u
-        adyacencia[u][v]:   Contenido de la arista (u,v), es decir, par (a,w) formado
-                            por el objeto almacenado en la arista "a" (object) y su peso "w" (float).
+        Dictionary that stores the adjacency list of the graph.
+        adyacencia[u]:  dictionary whose keys are the adjacency of u
+        adyacencia[u][v]:   Content of the edge (u,v), i.e., pair (a,w) formed
+                            by the object stored in the edge "a" (object) and its weight "w" (float).
         """
         self.adyacencia:Dict[object,Dict[object,Tuple[object,float]]]={}
 
     #### Operaciones básicas del TAD ####
     def es_dirigido(self)->bool:
-        """ Indica si el grafo es dirigido o no
+        """ Indicates whether the graph is directed or not
         
         Args: None
-        Returns: True si el grafo es dirigido, False si no.
+        Returns: True if the graph is directed, False if not.
         Raises: None
         """
         if self.es_dirigido:
@@ -71,13 +71,13 @@ class Grafo():
             return False
     
     def agregar_vertice(self,v:object)->None:
-        """ Agrega el vértice v al grafo.
+        """ Adds the vertex v to the graph.
         
         Args:
-            v (object): vértice que se quiere agregar. Debe ser "hashable".
+            v (object): vertex to be added. Must be "hashable".
         Returns: None
         Raises:
-            TypeError: Si el objeto no es "hashable".
+            TypeError: If the object is not "hashable".
         """
 
         es_hasheable(v)
@@ -87,19 +87,19 @@ class Grafo():
 
 
     def agregar_arista(self,s:object,t:object,data:object=None,weight:float=1)->None:
-        """ Si los objetos s y t son vértices del grafo, agrega
-        una arista al grafo que va desde el vértice s hasta el vértice t
-        y le asocia los datos "data" y el peso weight.
-        En caso contrario, no hace nada.
+        """ If the objects s and t are vertices of the graph, adds
+        an edge to the graph that goes from vertex s to vertex t
+        and associates the data "data" and the weight weight.
+        Otherwise, it does nothing.
         
         Args:
-            s (object): vértice de origen (source).
-            t (object): vértice de destino (target).
-            data (object, opcional): datos de la arista. Por defecto, None.
-            weight (float, opcional): peso de la arista. Por defecto, 1.
+            s (object): source vertex.
+            t (object): target vertex.
+            data (object, optional): edge data. Defaults to None.
+            weight (float, optional): edge weight. Defaults to 1.
         Returns: None
         Raises:
-            TypeError: Si s o t no son "hashable".
+            TypeError: If s or t are not "hashable".
         """
 
         es_hasheable(s)
@@ -111,14 +111,14 @@ class Grafo():
                 self.adyacencia[t][s] = (data, weight)
     
     def eliminar_vertice(self,v:object)->None:
-        """ Si el objeto v es un vértice del grafo lo elimina.
-        Si no, no hace nada.
+        """ If the object v is a vertex of the graph, it is removed.
+        If not, it does nothing.
         
         Args:
-            v (object): vértice que se quiere eliminar.
+            v (object): vertex to be removed.
         Returns: None
         Raises:
-            TypeError: Si v no es "hashable".
+            TypeError: If v is not "hashable".
         """
 
         es_hasheable(v)
@@ -138,16 +138,16 @@ class Grafo():
                     del self.adyacencia[vertice][v]
 
     def eliminar_arista(self,s:object,t:object)->None:
-        """ Si los objetos s y t son vértices del grafo y existe
-        una arista de u a v la elimina.
-        Si no, no hace nada.
+        """ If the objects s and t are vertices of the graph and there is
+        an edge from u to v, it is removed.
+        If not, it does nothing.
         
         Args:
-            s: vértice de origen de la arista (source).
-            t: vértice de destino de la arista (target).
+            s: source vertex of the edge.
+            t: target vertex of the edge.
         Returns: None
         Raises:
-            TypeError: Si s o t no son "hashable".
+            TypeError: If s or t are not "hashable".
         """
     
         es_hasheable(s)
@@ -158,19 +158,19 @@ class Grafo():
 
 
     def obtener_arista(self,s:object,t:object)->Tuple[object,float]:
-        """ Si los objetos s y t son vértices del grafo y existe
-        una arista de u a v, devuelve sus datos y su peso en una tupla.
-        Si no, devuelve None
+        """ If the objects s and t are vertices of the graph and there is
+        an edge from u to v, returns its data and weight in a tuple.
+        If not, returns None
         
         Args:
-            s: vértice de origen de la arista (source).
-            t: vértice de destino de la arista (target).
+            s: source vertex of the edge.
+            t: target vertex of the edge.
         Returns:
-            Tuple[object,float]: Una tupla (a,w) con los datos "a" de la arista (s,t) y su peso
-                "w" si la arista existe.
-            None: Si la arista (s,t) no existe en el grafo.
+            Tuple[object,float]: A tuple (a,w) with the data "a" of the edge (s,t) and its weight
+                "w" if the edge exists.
+            None: If the edge (s,t) does not exist in the graph.
         Raises:
-            TypeError: Si s o t no son "hashable".
+            TypeError: If s or t are not "hashable".
         """
 
         es_hasheable(s)
@@ -181,11 +181,11 @@ class Grafo():
         
 
     def lista_vertices(self)->List[object]:
-        """ Devuelve una lista con los vértices del grafo.
+        """ Returns a list with the vertices of the graph.
         
         Args: None
         Returns:
-            List[object]: Una lista [v1,v2,...,vn] de los vértices del grafo.
+            List[object]: A list [v1,v2,...,vn] of the vertices of the graph.
         Raises: None
         """
 
@@ -198,7 +198,7 @@ class Grafo():
     
     def lista_aristas(self)->List[object]:
         """
-        Devuelve una lista con todas las aristas del grafo y sus respectivos pesos
+        Returns a list with all the edges of the graph and their respective weights
         """
         aristas = []
         for origen, adyacentes in self.adyacencia.items():
@@ -207,18 +207,18 @@ class Grafo():
         return aristas
 
     def lista_adyacencia(self,u:object)->List[object]:
-        """ Si el objeto u es un vértice del grafo, devuelve
-        su lista de adyacencia, es decir, una lista [v1,...,vn] con los vértices
-        tales que (u,v1), (u,v2),..., (u,vn) son aristas del grafo.
-        Si no, devuelve None.
+        """ If the object u is a vertex of the graph, returns
+        its adjacency list, i.e., a list [v1,...,vn] with the vertices
+        such that (u,v1), (u,v2),..., (u,vn) are edges of the graph.
+        If not, returns None.
         
-        Args: u vértice del grafo
+        Args: u vertex of the graph
         Returns:
-            List[object]: Una lista [v1,v2,...,vn] de los vértices del grafo
-                adyacentes a u si u es un vértice del grafo
-            None: si u no es un vértice del grafo
+            List[object]: A list [v1,v2,...,vn] of the vertices of the graph
+                adjacent to u if u is a vertex of the graph
+            None: if u is not a vertex of the graph
         Raises:
-            TypeError: Si u no es "hashable".
+            TypeError: If u is not "hashable".
         """
         es_hasheable(u)
 
@@ -233,17 +233,17 @@ class Grafo():
 
     #### Grados de vértices ####
     def grado_saliente(self,v:object)-> int:
-        """ Si el objeto v es un vértice del grafo, devuelve
-        su grado saliente, es decir, el número de aristas que parten de v.
-        Si no, devuelve None.
+        """ If the object v is a vertex of the graph, returns
+        its outgoing degree, i.e., the number of edges that start from v.
+        If not, returns None.
         
         Args:
-            v (object): vértice del grafo
+            v (object): vertex of the graph
         Returns:
-            int: El grado saliente de u si el vértice existe
-            None: Si el vértice no existe.
+            int: The outgoing degree of u if the vertex exists
+            None: If the vertex does not exist.
         Raises:
-            TypeError: Si u no es "hashable".
+            TypeError: If u is not "hashable".
         """
         es_hasheable(v)
 
@@ -253,17 +253,17 @@ class Grafo():
 
 
     def grado_entrante(self,v:object)->int:
-        """ Si el objeto v es un vértice del grafo, devuelve
-        su grado entrante, es decir, el número de aristas que llegan a v.
-        Si no, devuelve None.
+        """ If the object v is a vertex of the graph, returns
+        its incoming degree, i.e., the number of edges that arrive at v.
+        If not, returns None.
         
         Args:
-            v (object): vértice del grafo
+            v (object): vertex of the graph
         Returns:
-            int: El grado entrante de u si el vértice existe
-            None: Si el vértice no existe.
+            int: The incoming degree of u if the vertex exists
+            None: If the vertex does not exist.
         Raises:
-            TypeError: Si v no es "hashable".
+            TypeError: If v is not "hashable".
         """
         es_hasheable(v)
 
@@ -278,19 +278,19 @@ class Grafo():
 
 
     def grado(self,v:object)->int:
-        """ Si el objeto v es un vértice del grafo, devuelve
-        su grado si el grafo no es dirigido y su grado saliente si
-        es dirigido.
-        Si no pertenece al grafo, devuelve None.
+        """ If the object v is a vertex of the graph, returns
+        its degree if the graph is not directed and its outgoing degree if
+        it is directed.
+        If it does not belong to the graph, returns None.
         
         Args:
-            v (object): vértice del grafo
+            v (object): vertex of the graph
         Returns:
-            int: El grado grado o grado saliente de u según corresponda
-                si el vértice existe
-            None: Si el vértice no existe.
+            int: The degree or outgoing degree of u as appropriate
+                if the vertex exists
+            None: If the vertex does not exist.
         Raises:
-            TypeError: Si v no es "hashable".
+            TypeError: If v is not "hashable".
         """
         
         es_hasheable(v)
@@ -301,20 +301,20 @@ class Grafo():
 
     #### Algoritmos ####
     def dijkstra(self,origen:object)-> Dict[object,object]:
-        """ Calcula un Árbol de Caminos Mínimos para el grafo partiendo
-        del vértice "origen" usando el algoritmo de Dijkstra. Calcula únicamente
-        el árbol de la componente conexa que contiene a "origen".
+        """ Calculates a Minimum Path Tree for the graph starting
+        from the vertex "origen" using Dijkstra's algorithm. It only calculates
+        the tree of the connected component that contains "origen".
         
         Args:
-            origen (object): vértice del grafo de origen
+            origen (object): vertex of the graph of origin
         Returns:
-            Dict[object,object]: Devuelve un diccionario que indica, para cada vértice alcanzable
-                desde "origen", qué vértice es su padre en el árbol de caminos mínimos.
+            Dict[object,object]: Returns a dictionary that indicates, for each reachable vertex
+                from "origen", which vertex is its parent in the minimum path tree.
         Raises:
-            TypeError: Si origen no es "hashable".
+            TypeError: If origen is not "hashable".
         Example:
-            Si G.dijksra(1)={2:1, 3:2, 4:1} entonces 1 es padre de 2 y de 4 y 2 es padre de 3.
-            En particular, un camino mínimo desde 1 hasta 3 sería 1->2->3.
+            If G.dijksra(1)={2:1, 3:2, 4:1} then 1 is parent of 2 and 4 and 2 is parent of 3.
+            In particular, a minimum path from 1 to 3 would be 1->2->3.
         """
         
         es_hasheable(origen)
@@ -339,20 +339,20 @@ class Grafo():
     
 
     def camino_minimo(self,origen:object,destino:object)->List[object]:
-        """ Calcula el camino mínimo desde el vértice origen hasta el vértice
-        destino utilizando el algoritmo de Dijkstra.
+        """ Calculates the minimum path from the origin vertex to the
+        destination vertex using Dijkstra's algorithm.
         
         Args:
-            origen (object): vértice del grafo de origen
-            destino (object): vértice del grafo de destino
+            origen (object): vertex of the graph of origin
+            destino (object): vertex of the graph of destination
         Returns:
-            List[object]: Devuelve una lista con los vértices del grafo por los que pasa
-                el camino más corto entre el origen y el destino. El primer elemento de
-                la lista es origen y el último destino.
+            List[object]: Returns a list with the vertices of the graph through which it passes
+                the shortest path between the origin and the destination. The first element of
+                the list is origin and the last destination.
         Example:
-            Si G.camino_minimo(1,4)=[1,5,2,4] entonces el camino más corto en G entre 1 y 4 es 1->5->2->4.
+            If G.camino_minimo(1,4)=[1,5,2,4] then the shortest path in G between 1 and 4 is 1->5->2->4.
         Raises:
-            TypeError: Si origen o destino no son "hashable".
+            TypeError: If origen or destino are not "hashable".
         """
 
         es_hasheable(origen)
@@ -370,18 +370,18 @@ class Grafo():
 
 
     def prim(self)-> Dict[object,object]:
-        """ Calcula un Árbol Abarcador Mínimo para el grafo
-        usando el algoritmo de Prim.
+        """ Calculates a Minimum Spanning Tree for the graph
+        using Prim's algorithm.
         
         Args: None
         Returns:
-            Dict[object,object]: Devuelve un diccionario que indica, para cada vértice del
-                grafo, qué vértice es su padre en el árbol abarcador mínimo.
+            Dict[object,object]: Returns a dictionary that indicates, for each vertex of the
+                graph, which vertex is its parent in the minimum spanning tree.
         Raises: None
         Example:
-            Si G.prim()={2:1, 3:2, 4:1} entonces en un árbol abarcador mínimo tenemos que:
-                1 es padre de 2 y de 4
-                2 es padre de 3
+            If G.prim()={2:1, 3:2, 4:1} then in a minimum spanning tree we have that:
+                1 is parent of 2 and 4
+                2 is parent of 3
         """
         # Conjunto para almacenar los vértices ya visitados
         visitados = set()
@@ -408,17 +408,17 @@ class Grafo():
                     
 
     def kruskal(self)-> List[Tuple[object,object]]:
-        """ Calcula un Árbol Abarcador Mínimo para el grafo
-        usando el algoritmo de Kruskal.
+        """ Calculates a Minimum Spanning Tree for the graph
+        using Kruskal's algorithm.
         
         Args: None
         Returns:
-            List[Tuple[object,object]]: Devuelve una lista [(s1,t1),(s2,t2),...,(sn,tn)]
-                de los pares de vértices del grafo que forman las aristas
-                del arbol abarcador mínimo.
+            List[Tuple[object,object]]: Returns a list [(s1,t1),(s2,t2),...,(sn,tn)]
+                of the pairs of vertices of the graph that form the edges
+                of the minimum spanning tree.
         Raises: None
         Example:
-            En el ejemplo anterior en que G.kruskal()={2:1, 3:2, 4:1} podríamos tener, por ejemplo,
+            In the previous example in which G.kruskal()={2:1, 3:2, 4:1} we could have, for example,
             G.prim=[(1,2),(1,4),(3,2)]
         """
         
@@ -454,14 +454,14 @@ class Grafo():
 
     #### NetworkX ####
     def convertir_a_NetworkX(self)-> nx.Graph:
-        """ Construye un grafo o digrafo de Networkx según corresponda
-        a partir de los datos del grafo actual.
+        """ Builds a Networkx graph or digraph as appropriate
+        from the data of the current graph.
         
         Args: None
         Returns:
-            networkx.Graph: Objeto Graph de NetworkX si el grafo es no dirigido.
-            networkx.DiGraph: Objeto DiGraph si el grafo es dirigido.
-            En ambos casos, los vértices y las aristas son los contenidos en el grafo dado.
+            networkx.Graph: Graph object from NetworkX if the graph is undirected.
+            networkx.DiGraph: DiGraph object if the graph is directed.
+            In both cases, the vertices and edges are those contained in the given graph.
         Raises: None
         """
         if self.dirigido:
@@ -479,3 +479,11 @@ class Grafo():
 
         return grafo
     
+def es_hasheable(v):
+    """
+    Check if the object is hashable
+    """
+    try:
+        hash(v)
+    except TypeError:
+        raise TypeError("The object is not hashable")

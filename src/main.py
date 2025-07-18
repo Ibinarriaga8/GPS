@@ -1,10 +1,17 @@
 import inquirer
 from difflib import SequenceMatcher, get_close_matches
-import gps
-from callejero import direcciones
+import src.gps as gps
+from src.callejero import direcciones
 nombre_direcciones = gps.cargar_direcciones(direcciones).keys()
 
 def seleccionar_calle(message):
+    """
+    Prompts the user to select a street from a list of close matches to their input.
+    Args:
+        message (str): The message to display to the user when prompting for input.
+    Returns:
+        str: The street selected by the user.
+    """
     direccion = input(message)
     coincidencias = get_close_matches(direccion.upper(), nombre_direcciones)
 
@@ -17,6 +24,11 @@ def seleccionar_calle(message):
     return calle_seleccionada
 
 def elegir_modo()->str:
+    """
+    Prompts the user to select a mode for finding the route (fastest or shortest).
+    Returns:
+        str: The selected mode ("fastest" or "shortest").
+    """
     modo = input("Pulse S si desea encontrar la ruta más corta ó F si desea encontrar la ruta más rápida: ").upper()
     if modo == "F":
         modo = "fastest"

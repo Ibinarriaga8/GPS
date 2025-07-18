@@ -71,7 +71,7 @@ An HTTP API is also exposed to query routes programmatically.
 ### 🚀 Server execution:
 
 ```bash
-python -m uvicorn api:app --port 8080 --log-level debug
+python -m uvicorn src.api:app --port 8080 --log-level debug
 ```
 
 ### 📮 Endpoint `/ruta`
@@ -118,7 +118,7 @@ POST /ruta
 Quick installation:
 
 ```bash
-pip install pandas networkx matplotlib inquirer fastapi uvicorn
+pip install -r requirements.txt
 ```
 
 ---
@@ -126,7 +126,7 @@ pip install pandas networkx matplotlib inquirer fastapi uvicorn
 ## ▶️ Execution (console mode)
 
 ```bash
-python main.py
+ python -m src.main
 ```
 
 The program will ask you to select origin and destination through the console with an autocomplete system like a navigator.

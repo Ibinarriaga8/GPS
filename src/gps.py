@@ -1,33 +1,36 @@
 """
 gps.py
 
-Matemática Discreta - IMAT
-ICAI, Universidad Pontificia Comillas
+Discrete Mathematics - IMAT
+ICAI, Pontifical University Comillas
 
-Grupo: GP02B
-Integrantes:
+Group: GP02B
+Members:
     - Jorge Ibinarriaga
     - Miguel Angel Huamani 
     
 """
-#LIBRERIAS
-import grafo
-import callejero
+#LIBRARIES
+import src.grafo as grafo
+import src.callejero as callejero
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
 import time
-from callejero import cruces, direcciones, VELOCIDAD_CALLES_ESTANDAR, VELOCIDADES_CALLES
+from src.callejero import cruces, direcciones, VELOCIDAD_CALLES_ESTANDAR, VELOCIDADES_CALLES
 
 def distancia_entre_nodos(cruce1: callejero.Cruce, cruce2: callejero.Cruce):
-    #Para encontrar la ruta más rápida
+    """
+    Calculates the distance between two nodes.
+    To find the fastest route
+    """
     return callejero.distancia(cruce1.coord_x, cruce1.coord_y, cruce2.coord_x, cruce2.coord_y)
 
 def crear_grafo_distancia()->grafo.Grafo:
     """
-    Grafo del callejero cuyo peso está determinado por la distancía física entre dos cruces
+    Street graph whose weight is determined by the physical distance between two intersections
     """
     G = grafo.Grafo()
     V = list(callejero.procesar_cruces(cruces).values())
@@ -46,7 +49,7 @@ def crear_grafo_distancia()->grafo.Grafo:
 
 def crear_grafo_tiempo():
     """
-    Grafo del callejero cuyo peso está determinado por las velocidades de las vías
+    Street graph whose weight is determined by the speeds of the roads
     """
     G = grafo.Grafo()
     V = list(callejero.procesar_cruces(cruces).values())
@@ -73,6 +76,9 @@ def crear_grafo_tiempo():
 
 
 def dibujar_grafo(G:grafo.Grafo):
+    """
+    Draws the graph.
+    """
     vertices = G.lista_vertices()
     posicion = dict()
     for vertice in vertices:
@@ -82,6 +88,9 @@ def dibujar_grafo(G:grafo.Grafo):
     plt.show()
 
 def dibujar_ruta(camino, G):
+    """
+    Draws the route on the graph.
+    """
     vertices = G.lista_vertices()
     G = G.convertir_a_NetworkX()
     posicion = dict()
@@ -95,6 +104,9 @@ def dibujar_ruta(camino, G):
 
 
 def cargar_direcciones(direcciones:pd.DataFrame)->dict:
+    """
+    Loads the addresses from a DataFrame into a dictionary.
+    """
     nombre_direcciones = direcciones["Clase de la via"].apply(lambda d: d.rstrip()) + direcciones['Particula de la via'].apply(lambda d: " " + d.rstrip()) + direcciones['Nombre de la via'].apply(lambda d: " "+d.rstrip()) + direcciones["Literal de numeracion"].apply(lambda d: " " + d.rstrip()) #keys
     coordenadas_direcciones = list(zip(direcciones["Coordenada X (Guia Urbana) cm"], direcciones["Coordenada Y (Guia Urbana) cm"])) #values
     diccionario_direcciones = dict(zip(nombre_direcciones, coordenadas_direcciones))
@@ -102,6 +114,9 @@ def cargar_direcciones(direcciones:pd.DataFrame)->dict:
 
 
 def obtener_informacion_direccion(cadena):
+    """
+    Gets the address information from a string.
+    """
     match_calle = re.match(r"([^\d]+) NUM(\d+)", cadena)
     match_autovia = re.match(r"AUTOVIA\s+(A\-\d+)", cadena)
 
@@ -116,7 +131,7 @@ def obtener_informacion_direccion(cadena):
 
 def encontrar_cruce_mas_cercano(direccion):
     """
-    Encuentra el cruce más cercano a una dirección dada
+    Finds the nearest intersection to a given address
     """
     diccionario_direcciones = cargar_direcciones(direcciones)
     coordenas_dir = diccionario_direcciones[direccion]
@@ -132,6 +147,7 @@ def encontrar_cruce_mas_cercano(direccion):
 
 def encontrar_ruta_minima(nodo_origen, nodo_destino, modo):
     """
+    Finds the shortest path between two nodes in the graph.
     """
     if modo == "fastest":
         G = crear_grafo_tiempo()
@@ -141,23 +157,32 @@ def encontrar_ruta_minima(nodo_origen, nodo_destino, modo):
     return camino, G
 
 def rotonda(nodo):
+    """
+    Checks if a node is a roundabout.
+    """
     return len(nodo.lista_calles()) > 3
 
 def angulo_entre_vectores(v1, v2):
+    """
+    Calculates the angle between two vectors.
+    """
     v1 = np.array(v1)
     v2 = np.array(v2)
     return np.degrees(np.arctan2(v2[1], v2[0]) - np.arctan2(v1[1], v1[0]))
 
 def determinar_sentido_giro(nodo1, nodo2, nodo3)->bool:
     """
-    Devuelve True si el giro es a la derecha
-    False si el giro es a la izquierda
+    Returns True if the turn is to the right
+    False if the turn is to the left
     """
     vector_12 = (nodo2.coord_x - nodo1.coord_x, nodo2.coord_y - nodo1.coord_y)
     vector_13 = (nodo3.coord_x - nodo1.coord_x, nodo3.coord_y - nodo1.coord_y)
     return (angulo_entre_vectores(vector_12, vector_13) >= 0)
     
 def obtener_calle_arista(nodo1, nodo2):
+    """
+    Gets the street name of the edge between two nodes.
+    """
     calles_nodo1 = nodo1.calles
     calles_nodo2 = nodo2.calles
     calle_nodo = list(calles_nodo1.intersection(calles_nodo2))
@@ -165,17 +190,20 @@ def obtener_calle_arista(nodo1, nodo2):
 
 
 def determinar_sentido_giro(nodo1, nodo2, nodo3):
+    """
+    Determines the turning direction.
+    """
     return (nodo3.coord_x -nodo2.coord_x > 0)
 
 
 def dirigir_ruta(direccion_origen, direccion_destino, modo = "fastest"):
     """
-    Dado una dirección origen y una dirección destino de las direcciones, 
-    da las indicaciones que sigue la ruta según el camino mínimo.
+    Given an origin address and a destination address,
+    gives the directions that the route follows according to the shortest path.
     """
     calle_origen = obtener_informacion_direccion(direccion_origen)["nombre"] 
     nodo_origen, d_or = encontrar_cruce_mas_cercano(direccion_origen)
-    print("Cargando ruta...")
+    print("Cargando ruta...") #Loading route...
     nodo_destino, d_dest = encontrar_cruce_mas_cercano(direccion_destino)
     camino, G = encontrar_ruta_minima(nodo_origen, nodo_destino, modo)
     print(f"Continua por {calle_origen} {d_or/100} metros")
@@ -208,12 +236,12 @@ def dirigir_ruta(direccion_origen, direccion_destino, modo = "fastest"):
 
 def dirigir_ruta_api(direccion_origen, direccion_destino, modo = "fastest"):
     """
-    Dado una dirección origen y una dirección destino de las direcciones, 
-    da las indicaciones que sigue la ruta según el camino mínimo.
+    Given an origin address and a destination address,
+    gives the directions that the route follows according to the shortest path.
     """
     calle_origen = obtener_informacion_direccion(direccion_origen)["nombre"] 
     nodo_origen, d_or = encontrar_cruce_mas_cercano(direccion_origen)
-    print("Cargando ruta...")
+    print("Cargando ruta...") #Loading route...
     nodo_destino, d_dest = encontrar_cruce_mas_cercano(direccion_destino)
     camino, G = encontrar_ruta_minima(nodo_origen, nodo_destino, modo)
     print(f"Continua por {calle_origen} {d_or/100} metros")
@@ -244,5 +272,3 @@ def dirigir_ruta_api(direccion_origen, direccion_destino, modo = "fastest"):
     salida.append(f"Continua por {calle_destino} {d_dest/100} metros")
     salida.append("Ha llegado a su destino")
     return salida, G
-
-

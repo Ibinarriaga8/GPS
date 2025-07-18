@@ -1,24 +1,24 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from gps import dirigir_ruta_api
+from src.gps import dirigir_ruta_api
 from difflib import get_close_matches
-from callejero import direcciones
-import gps
+from src.callejero import direcciones
+import src.gps as gps
 import logging
 
-# Configurar logging
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Lazy load de direcciones
+# Lazy load of addresses
 _nombre_direcciones = None
 
 def get_nombre_direcciones():
     global _nombre_direcciones
     if _nombre_direcciones is None:
-        logger.info("Cargando direcciones por primera vez...")
+        logger.info("Loading addresses for the first time...")
         _nombre_direcciones = gps.cargar_direcciones(direcciones).keys()
-        logger.info(f"Se cargaron {_nombre_direcciones.__len__()} direcciones.")
+        logger.info(f"Loaded {_nombre_direcciones.__len__()} addresses.")
     return _nombre_direcciones
 
 app = FastAPI()
@@ -37,10 +37,10 @@ class InputProcesser:
         
         if coincidencias:
             calle_seleccionada = coincidencias[0]
-            logger.info(f"Seleccionado automáticamente: {calle_seleccionada} para entrada: {direccion}")
+            logger.info(f"Automatically selected: {calle_seleccionada} for input: {direccion}")
         else:
             calle_seleccionada = direccion_upper
-            logger.warning(f"No se encontraron coincidencias claras para '{direccion}', usando tal cual.")
+            logger.warning(f"No clear matches found for '{direccion}', using it as is.")
         
         return calle_seleccionada
 
@@ -51,13 +51,13 @@ class InputProcesser:
         elif modo.upper() == "S":
             return "shortest"
         else:
-            logger.warning(f"Modo '{modo}' no reconocido. Usando 'fastest' por defecto.")
+            logger.warning(f"Mode '{modo}' not recognized. Using 'fastest' by default.")
             return "fastest"
 
 @app.get("/")
 def root():
-    logger.info("API de rutas funcionando")
-    return {"message": "API de rutas funcionando"}
+    logger.info("Route API running")
+    return {"message": "Route API running"}
 
 @app.post("/ruta")
 def obtener_ruta(req: RutaRequest):
@@ -65,14 +65,14 @@ def obtener_ruta(req: RutaRequest):
         origen = InputProcesser.seleccionar_calle(req.origen)
         destino = InputProcesser.seleccionar_calle(req.destino)
         modo = InputProcesser.elegir_modo(req.modo)
-        logger.info(f"Iniciando búsqueda de ruta: {origen} -> {destino}, modo {modo}")
+        logger.info(f"Starting route search: {origen} -> {destino}, mode {modo}")
         ruta, grafo = dirigir_ruta_api(origen, destino, modo)
-        logger.info("Ruta obtenida")
+        logger.info("Route obtained")
 
         if not ruta:
-            return {"error": "No se encontró ruta para esos parámetros"}
+            return {"error": "No route found for those parameters"}
 
         return {"ruta": ruta}
     except Exception as e:
-        logger.exception("Error al obtener la ruta")
+        logger.exception("Error getting the route")
         return {"error": str(e)}

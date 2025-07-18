@@ -1,34 +1,35 @@
 """
 callejero.py
 
-Matemática Discreta - IMAT
+Discrete Mathematics - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Grupo: GP02B
-Integrantes:
+Group: GP02B
+Members:
     - Jorge Ibinarriaga
     - Miguel Angel Huamani
 
-Descripción:
-Librería con herramientas y clases auxiliares necesarias para la representación de un callejero en un grafo.
+Description:
+Library with auxiliary tools and classes needed for the representation of a street map in a graph.
 
-Complétese esta descripción según las funcionalidades agregadas por el grupo.
+Complete this description according to the functionalities added by the group.
 """
-import dgt_main
+import src.dgt_main as dgt_main
 import pandas as pd
 import math
 import numpy as np
 cruces = dgt_main.cruces_read()
 direcciones = dgt_main.direcciones_read()
 cruces, direcciones = dgt_main.process_data(cruces, direcciones)
-#Constantes con las velocidades máximas establecidas por el enunciado para cada tipo de vía.
+
+# Constants with the maximum speeds established by the statement for each type of road.
 VELOCIDADES_CALLES={"AUTOVIA":100,"AVENIDA":90,"CARRETERA":70,"CALLEJON":30,"CAMINO":30,"ESTACION DE METRO":20,"PASADIZO":20,"PLAZUELA":20,"COLONIA":20}
 VELOCIDAD_CALLES_ESTANDAR=50
 
-#DIRECCIONES
+# ADDRESSES
 def concatenar_vias(direcciones):
     """
-    Concatena las columnas 'Clase de via' 'Particula de  la via' y 'Nombre de la via' y las unifica en una misma columna
+    Concatenates the columns 'Street class', 'Street particle' and 'Street name' and unifies them in a single column
     """
     def concat_vias(row):
         return f"{row['Clase de la via'].rstrip()} {row['Particula de la via'].rstrip()} {row['Nombre de la vía'].rstrip()}"
@@ -61,26 +62,26 @@ def unificar_cruces(cruces, R=30*100):
 
 class Cruce:
 
-    #Completar esta clase con los datos y métodos que se necesite asociar a cada cruce
+    # Complete this class with the data and methods needed to associate with each intersection
 
     def __init__(self,coord_x,coord_y, loc):
         self.coord_x=coord_x
         self.coord_y=coord_y
         self.calles = set()
-        self.loc = loc #localización
-        #Completar la inicialización de las estructuras de datos agregadas
+        self.loc = loc # location
+        # Complete the initialization of added data structures
 
-    """Se hace que la clase Cruce sea "hashable" mediante la implementación de los métodos
-    __eq__ y __hash__, haciendo que dos objetos de tipo Cruce se consideren iguales cuando
-    sus coordenadas coincidan (es decir, C1==C2 si y sólo si C1 y C2 tienen las mismas coordenadas),
-    independientemente de los otros campos que puedan estar almacenados en los objetos.
-    La función __hash__ se adapta en consecuencia 
-    para que sólo dependa del par (coord_x, coord_y).
+    """The Cruce class is made "hashable" by implementing the
+    __eq__ and __hash__ methods, making two objects of type Cruce considered equal when
+    their coordinates match (i.e., C1==C2 if and only if C1 and C2 have the same coordinates),
+    regardless of the other fields that may be stored in the objects.
+    The __hash__ function is adapted accordingly 
+    to only depend on the pair (coord_x, coord_y).
     """
     def agregar_calle(self, calle):
         self.calles.add(calle) 
     def lista_calles(self):
-        return list(self.calles) #devuelve una lista con todas las calles del cruce
+        return list(self.calles) # returns a list with all the streets at the intersection
 
     def __eq__(self,other) -> int:
         if type(other) is type(self):
@@ -93,7 +94,7 @@ class Cruce:
     
 def distancia(x1:int,y1:int,x2:int,y2:int)->float:
     """
-    Calcula la distancia euclidea en R2.
+    Calculates the euclidean distance in R2.
     d: (x1,y1) x (x2,y2) -> R+
     """
     x,y = x2-x1, y2-y1
@@ -104,8 +105,8 @@ def procesar_cruces(cruces: pd.DataFrame):
     global cruces_dict
     cruces = unificar_cruces(cruces)
     """
-    A partir del dataframe de cruces, se almacenan los cruces en la clase Cruce, 
-    conteniendo una lista con todas las calles que confluyen en ese cruce.
+    From the intersections dataframe, intersections are stored in the Cruce class, 
+    containing a list with all the streets that converge at that intersection.
     """
     df= cruces[["Coordenada X (Guia Urbana) cm (cruce)", "Coordenada Y (Guia Urbana) cm (cruce)", "Literal completo del vial tratado", "Literal completo del vial que cruza", "Longitud en S R  WGS84 (cruce)", "Latitud en S R  WGS84 (cruce)"]]
     cruces_dict = {}
@@ -115,16 +116,28 @@ def procesar_cruces(cruces: pd.DataFrame):
         coord_y = row['Coordenada Y (Guia Urbana) cm (cruce)']
         loc = (row["Longitud en S R  WGS84 (cruce)"], row["Latitud en S R  WGS84 (cruce)"])
         coordendas_cruce = (coord_x, coord_y)
-        if coordendas_cruce in cruces_dict.keys(): #el cruce ya existe
+        if coordendas_cruce in cruces_dict.keys(): # the intersection already exists
             cruce = cruces_dict[coordendas_cruce]
         else:
-            cruce = Cruce(coord_x, coord_y, loc) #crea cruce
+            cruce = Cruce(coord_x, coord_y, loc) # create intersection
             cruces_dict[coordendas_cruce] = cruce
         cruce.agregar_calle(row['Literal completo del vial tratado'])
         cruce.agregar_calle(row["Literal completo del vial que cruza"])
     return cruces_dict
                                                            
 class Calle:
+    """
+        Represents a street with its name, code, and intersections.
+
+        Attributes:
+            nombre (str): The name of the street.
+            codigo_via (int): The unique code of the street.
+            cruces (set): A set of intersections the street has.
+
+        Methods:
+            agregar_cruce(cruce): Adds an intersection to the street's set of intersections.
+            lista_cruces(): Returns a list of all intersections the street has.
+        """
     def __init__(self, nombre_calle, codigo_via):
         self.nombre = nombre_calle
         self.codigo_via = codigo_via
@@ -132,13 +145,13 @@ class Calle:
     def agregar_cruce(self, cruce):
         self.cruces.add(cruce)
     def lista_cruces(self):
-        return list(self.cruces) #devuelve una lista con todos los cruces en esa calle
+        return list(self.cruces) # returns a list with all intersections on that street
 
 def procesar_calles(cruces: pd.DataFrame)->dict:
     global cruces_dict
     """
-    A partir del dataframe de cruces, almacena todas las calles con sus respectivos cruces 
-    en un diccionario con claves el nombre de la calle y valores el objeto calle
+    From the intersections dataframe, stores all streets with their respective intersections 
+    in a dictionary with keys as the street name and values as the street object
     """
     procesar_cruces(cruces)
     list(cruces)
@@ -150,10 +163,10 @@ def procesar_calles(cruces: pd.DataFrame)->dict:
         nombre_calle = row['Literal completo del vial tratado']
         codigo_via = row["Codigo de via tratado"]
         coordendas_cruce = (coord_x, coord_y)
-        cruce = cruces_dict[coordendas_cruce] #obtienes el cruce
+        cruce = cruces_dict[coordendas_cruce] # get the intersection
         if not codigo_via in calles_dict.keys():
-            calle = Calle(nombre_calle, codigo_via) #crear calle
-            calle.agregar_cruce(cruce) #añadimos cruce
+            calle = Calle(nombre_calle, codigo_via) # create street
+            calle.agregar_cruce(cruce) # add intersection
             calles_dict[codigo_via] = calle
         else:
             calle = calles_dict[codigo_via]

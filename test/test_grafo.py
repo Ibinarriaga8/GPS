@@ -1,37 +1,37 @@
 """
 test_grafo.py
 
-Matemática Discreta - IMAT
+Discreet Mathematics - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Descripción:
-Script para verificación básica del funcionamiento de la librería grafo.py.
+Description:
+Script for basic verification of the operation of the grafo.py library.
 
-Las listas "vertices" y "aristas" describen un grafo (dirigido o no dirigido).
-El script construye dicho grafo tomando pesos aleatorios en las aristas
-usando la librería grafo.py.
+The "vertices" and "aristas" lists describe a graph (directed or undirected).
+The script builds this graph taking random weights on the edges
+using the grafo.py library.
 
-Después realiza vairas operaciones básicas sobre el grafo y ejecuta sobre él:
+Then it performs several basic operations on the graph and executes on it:
     - Dijkstra
-    - Búsqueda de un camino mínimo con Dijkstra
+    - Search for a minimum path with Dijkstra
     - Prim
     - Kruskal
 """
 import pytest
-import grafo
+import src.grafo as grafo
 import random
 
 MIN_PESO_ARISTA=1
 MAX_PESO_ARISTA=12
 
-#Listas de vértices y aristas del grafo
+#Vertices and edges lists of the graph
 dirigido=False
 vertices=[1,2,3,4,5,6]
 aristas=[(1,2),(1,3),(1,4),(1,5),(2,4),(3,4),(3,5),(5,6)]
 
 @pytest.fixture
 def grafo_instance():
-    #Creación del grafo
+    #Graph creation
     G=grafo.Grafo(dirigido)
     for v in vertices:
         G.agregar_vertice(v)
@@ -47,15 +47,15 @@ def test_grafo_creation(grafo_instance):
 
 def test_grafo_operations(grafo_instance):
     G = grafo_instance
-    #Eliminación de un vértice y una arista
+    #Deleting a vertex and an edge
     G.eliminar_vertice(6)
     G.eliminar_arista(1,5)
 
-    #Grados de vértices y listas de adyacencia
+    #Vertex degrees and adjacency lists
     for v in vertices:
         print(v,":" , G.grado(v),G.grado_entrante(v),G.grado_saliente(v),G.lista_adyacencia(v))
 
-    #Dijkstra y camino mínimo
+    #Dijkstra and shortest path
     acm=G.dijkstra(1)
     print(acm)
     assert acm is not None
@@ -64,7 +64,7 @@ def test_grafo_operations(grafo_instance):
     print(camino)
 
     if(not dirigido):
-        #Árbol abarcador mínimo
+        #Minimum spanning tree
         aam=G.kruskal()
         print(aam)
 
